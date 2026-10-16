@@ -12,7 +12,7 @@
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b20;--card:#182830;--ink:#e6f0f2;--mute:#8da3ab;--line:#264049;--acc:#4fc3ab;--accink:#06201a;--soft:#1d3b38;--del:#ff8b76}}
 :root[data-theme="dark"]{--bg:#0f1b20;--card:#182830;--ink:#e6f0f2;--mute:#8da3ab;--line:#264049;--acc:#4fc3ab;--accink:#06201a;--soft:#1d3b38;--del:#ff8b76}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI","Arial Hebrew",Arial,sans-serif;font-variant-numeric:tabular-nums}
 main{max-width:480px;margin:0 auto;padding:16px 16px 40px}
@@ -77,6 +77,8 @@ h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 4px 8px}
 .edrow .form{margin-top:0}
 .row .acts{display:flex;gap:4px}
 .row .eb{color:var(--acc)}
+.nav.sm button{width:38px;height:38px;font-size:18px}
+.nav.sm .t{font-size:15px;font-weight:600;color:var(--mute)}
 #msg{min-height:20px;margin:10px 4px 0;font-size:14px;color:var(--acc);font-weight:600}
 </style>
 </head>
@@ -88,6 +90,11 @@ h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 4px 8px}
     <div class="t"><span id="dTitle"></span><small id="dTotal"></small><input type="date" id="dPick" aria-label="בחירת תאריך"></div>
     <button id="dNext" aria-label="היום הבא">›</button>
   </div>
+  <details class="fold" id="calBox" style="margin-top:12px">
+    <summary>לוח שנה</summary>
+    <div class="card"><div class="nav sm" style="margin-bottom:8px"><button id="cPrev" aria-label="החודש הקודם">‹</button><div class="t" id="calCap"></div><button id="cNext" aria-label="החודש הבא">›</button></div><div class="cal" id="cal"></div></div>
+  </details>
+
   <div class="card form">
     <label>שם הילד/ה<input id="kid" type="text" autocomplete="off" placeholder="הקלידי שם"></label>
     <label>תאריך ושעת התחלה<input id="when" type="datetime-local"></label>
@@ -113,11 +120,6 @@ h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 4px 8px}
 
   <h2>ימי עבודה בחודש זה</h2>
   <div class="card" id="days"></div>
-
-  <details class="fold" id="calBox" open>
-    <summary>לוח שנה</summary>
-    <div class="card"><div class="sub" id="calCap" style="margin:0 0 8px"></div><div class="cal" id="cal"></div></div>
-  </details>
 
   <h2>גיבוי והעברה</h2>
   <div class="card">
@@ -303,9 +305,8 @@ function drawCal(){
   $("cal").innerHTML=h;
   $("calCap").textContent=`${parse(month+"-01").toLocaleDateString(LOC,{month:"long",year:"numeric"})} · ${worked.size} ימי עבודה`;
 }
-$("cal").onclick=e=>{const b=e.target.closest("button[data-d]");if(!b)return;day=b.dataset.d;render();scrollTo({top:0,behavior:"smooth"})};
-$("calBox").open=meta.calOpen!==false;
-$("calBox").addEventListener("toggle",()=>{meta.calOpen=$("calBox").open;saveMeta()});
+$("cal").onclick=e=>{const b=e.target.closest("button[data-d]");if(!b)return;day=b.dataset.d;render()};
+$("calBox").open=false;
 let editId=null,editDur=0;
 const endT=s=>{if(!s.time)return "";const p=s.time.split(":").map(Number);const t=(p[0]*60+p[1]+s.min)%1440;return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")};
 const kidNames=()=>{const c={};sessions.forEach(s=>{if(s.name)c[s.name]=(c[s.name]||0)+1});return Object.keys(c).sort((a,b)=>c[b]-c[a]||a.localeCompare(b,"he"))};
@@ -321,6 +322,7 @@ function suggest(inp){
 }
 const editHtml=s=>`<div class="form"><label>שם<input data-f="name" type="text" autocomplete="off" value="${esc(s.name||"")}"></label><div class="two"><label>תאריך<input data-f="date" type="date" value="${s.date}"></label><label>שעת התחלה<input data-f="time" type="time" value="${s.time||""}"></label></div><div class="seg">${DUR.map(m=>`<button type="button" data-dur="${m}" class="${m===editDur?"on":""}">${m} דק׳</button>`).join("")}</div><div class="two"><button class="copy fill" data-save>שמירה</button><button class="copy" data-cancel>ביטול</button></div></div>`;
 suggest($("kid"));
+$("cPrev").onclick=()=>shiftMonth(-1);$("cNext").onclick=()=>shiftMonth(1);
 const _render=render;render=function(){_render();bkStatus();drawCal();const en=$("list").querySelector("input[data-f=name]");if(en)suggest(en)};
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 render();
