@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>שעות עבודה</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="שעות">
+<meta name="color-scheme" content="light dark">
+<style>
+:root{--bg:#eef2f4;--card:#fff;--ink:#14313b;--mute:#62777f;--line:#d9e2e6;--acc:#1f7a6a;--accink:#fff;--soft:#dcefea;--del:#b3412f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b20;--card:#182830;--ink:#e6f0f2;--mute:#8da3ab;--line:#264049;--acc:#4fc3ab;--accink:#06201a;--soft:#1d3b38;--del:#ff8b76}}
+:root[data-theme="dark"]{--bg:#0f1b20;--card:#182830;--ink:#e6f0f2;--mute:#8da3ab;--line:#264049;--acc:#4fc3ab;--accink:#06201a;--soft:#1d3b38;--del:#ff8b76}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI","Arial Hebrew",Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:26px;font-weight:800;margin:4px 4px 16px;letter-spacing:0}
+h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 4px 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.nav button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:20px}
+.nav .t{flex:1;text-align:center;font-size:19px;font-weight:700;position:relative}
+.nav .t small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.nav input[type=date]{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+.add{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.add button{height:78px;border:0;border-radius:16px;background:var(--acc);color:var(--accink);font-size:30px;font-weight:700;line-height:1}
+.add button span{display:block;font-size:13px;font-weight:600;opacity:.85;margin-top:4px}
+.add button:active{transform:scale(.97)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row button{border:0;background:none;color:var(--del);font-size:15px;padding:6px 4px}
+.empty{color:var(--mute);text-align:center;padding:6px 0}
+.big{font-size:44px;font-weight:700;letter-spacing:-1px;line-height:1.1}
+.big small{font-size:18px;font-weight:600;color:var(--mute);letter-spacing:0}
+.sub{color:var(--mute);margin-top:4px}
+.chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.chip{background:var(--soft);border-radius:10px;padding:6px 10px;font-size:14px;font-weight:600}
+.day{display:flex;justify-content:space-between;width:100%;padding:11px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;text-align:start}
+.day:first-child{border-top:0}
+.day.sel{color:var(--acc);font-weight:700}
+.day em{font-style:normal;color:var(--mute)}
+.copy{width:100%;margin-top:12px;height:48px;border-radius:12px;border:1.5px solid var(--acc);background:none;color:var(--acc);font-size:16px;font-weight:700}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.btns .copy{margin-top:0}
+.fill{background:var(--acc)!important;color:var(--accink)!important}
+.stat{font-weight:600}
+.stat.warn{color:var(--del)}
+.note{color:var(--mute);font-size:14px;margin:10px 0 0}
+.form{margin-top:14px;display:grid;gap:12px}
+.form label{display:block;font-size:13px;font-weight:600;color:var(--mute)}
+.form input{display:block;width:100%;min-width:0;margin-top:4px;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:17px;padding:0 12px;text-align:start;-webkit-appearance:none;appearance:none}
+.fold{margin-top:26px}
+.fold summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:600;color:var(--mute);margin:0 4px 8px;padding:6px 0}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"⌵";font-size:18px;transition:transform .2s}
+.fold[open] summary::after{transform:rotate(180deg)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .h{font-size:12px;color:var(--mute);padding:4px 0}
+.cal button{height:46px;border:0;border-radius:10px;background:none;color:var(--ink);font:inherit;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.cal button.w{background:var(--soft);font-weight:700}
+.cal button.today{outline:1.5px solid var(--acc);outline-offset:-1.5px}
+.cal button.sel{background:var(--acc);color:var(--accink)}
+.cal .dot{width:6px;height:6px;border-radius:50%;background:var(--acc)}
+.cal .sel .dot{background:var(--accink)}
+#msg{min-height:20px;margin:10px 4px 0;font-size:14px;color:var(--acc);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="hello"></h1>
+  <div class="nav">
+    <button id="dPrev" aria-label="היום הקודם">‹</button>
+    <div class="t"><span id="dTitle"></span><small id="dTotal"></small><input type="date" id="dPick" aria-label="בחירת תאריך"></div>
+    <button id="dNext" aria-label="היום הבא">›</button>
+  </div>
+  <div class="card form">
+    <label>שם הילד/ה<input id="kid" type="text" list="kids" autocomplete="off" placeholder="הקלידי שם"></label>
+    <label>תאריך ושעת התחלה<input id="when" type="datetime-local"></label>
+  </div>
+  <datalist id="kids"></datalist>
+  <div class="add" id="add"></div>
+
+  <h2>מפגשים ביום זה</h2>
+  <div class="card" id="list"></div>
+
+  <h2>סיכום חודשי</h2>
+  <div class="nav">
+    <button id="mPrev" aria-label="החודש הקודם">‹</button>
+    <div class="t" id="mTitle"></div>
+    <button id="mNext" aria-label="החודש הבא">›</button>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div class="big" id="mHours"></div>
+    <div class="sub" id="mSub"></div>
+    <div class="chips" id="mChips"></div>
+    <div class="btns" style="margin-top:12px"><button class="copy fill" id="mExport">ייצוא CSV</button><button class="copy" id="mShare">שיתוף CSV</button></div>
+    <button class="copy" id="copy" style="margin-top:10px">העתקת סיכום</button>
+  </div>
+
+  <h2>ימי עבודה</h2>
+  <div class="card" id="days"></div>
+
+  <details class="fold" id="calBox" open>
+    <summary>לוח שנה</summary>
+    <div class="card"><div class="sub" id="calCap" style="margin:0 0 8px"></div><div class="cal" id="cal"></div></div>
+  </details>
+
+  <h2>גיבוי והעברה</h2>
+  <div class="card">
+    <div class="stat" id="bkStat"></div>
+    <div class="btns"><button class="copy fill" id="bkSave">גיבוי לקובץ</button><button class="copy" id="bkRestore">שחזור מקובץ</button></div>
+    <button class="copy" id="allCsv" style="margin-top:10px">ייצוא כל הנתונים ל-CSV</button>
+    <input type="file" id="bkFile" accept=".json,application/json" hidden>
+    <p class="note">שמרי את קובץ הגיבוי באפליקציית "קבצים" (iCloud Drive) כדי שיישאר גם אם נמחקים נתוני Safari, ויעבור למכשיר חדש. במכשיר החדש פותחים את האפליקציה ולוחצים על "שחזור מקובץ". השחזור מוסיף רק מפגשים חסרים ולא יוצר כפילויות.</p>
+  </div>
+  <div id="msg"></div>
+</main>
+<script>
+const KEY="session-hours-v1";
+let sessions=[];
+try{sessions=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){sessions=[]}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(sessions))}catch(e){}};
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const parse=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+let day=iso(new Date());
+let month=day.slice(0,7);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let tm=(()=>{const n=new Date();n.setMinutes(Math.round(n.getMinutes()/5)*5,0,0);return String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")})();
+const $=id=>document.getElementById(id);
+const LOC="he-IL";
+const hm=m=>Math.floor(m/60)+" שע׳ "+String(m%60).padStart(2,"0")+" דק׳";
+const DUR=[30,45,50];
+
+function greet(){
+  const h=new Date().getHours();
+  const g=h>=5&&h<12?"בוקר טוב":h>=12&&h<17?"צהריים טובים":"ערב טוב";
+  $("hello").textContent=g+" מטר";
+}
+greet();
+
+$("add").innerHTML=DUR.map(m=>`<button data-m="${m}">${m}<span>דק׳</span></button>`).join("");
+$("add").onclick=e=>{const b=e.target.closest("button");if(!b)return;
+  sessions.push({id:Date.now()+Math.random(),date:day,min:+b.dataset.m,name:$("kid").value.trim(),time:tm});save();$("kid").value="";
+  if(navigator.vibrate)navigator.vibrate(15);render()};
+$("list").onclick=e=>{const b=e.target.closest("button[data-id]");if(!b)return;
+  sessions=sessions.filter(s=>String(s.id)!==b.dataset.id);save();render()};
+const shiftDay=n=>{const d=parse(day);d.setDate(d.getDate()+n);day=iso(d);month=day.slice(0,7);render()};
+$("dPrev").onclick=()=>shiftDay(-1);$("dNext").onclick=()=>shiftDay(1);
+$("dPick").onchange=e=>{if(e.target.value){day=e.target.value;month=day.slice(0,7);render()}};
+const shiftMonth=n=>{const[y,m]=month.split("-").map(Number);const d=new Date(y,m-1+n,1);month=iso(d).slice(0,7);render()};
+$("mPrev").onclick=()=>shiftMonth(-1);$("mNext").onclick=()=>shiftMonth(1);
+$("days").onclick=e=>{const b=e.target.closest("button[data-d]");if(!b)return;day=b.dataset.d;render();scrollTo({top:0,behavior:"smooth"})};
+
+$("when").onchange=e=>{const v=e.target.value;if(!v)return;const p=v.split("T");day=p[0];tm=(p[1]||tm).slice(0,5);month=day.slice(0,7);render()};
+
+let summaryText="";
+$("copy").onclick=async()=>{
+  try{await navigator.clipboard.writeText(summaryText);$("copy").textContent="הועתק"}
+  catch(e){$("copy").textContent="ההעתקה לא זמינה"}
+  setTimeout(()=>$("copy").textContent="העתקת סיכום",1600)};
+
+function render(){
+  const d=parse(day);
+  const today=iso(new Date());
+  $("dTitle").textContent=d.toLocaleDateString(LOC,{weekday:"long",day:"numeric",month:"short"});
+  const ds=sessions.filter(s=>s.date===day);
+  const dt=ds.reduce((a,s)=>a+s.min,0);
+  $("dTotal").textContent=(day===today?"היום · ":"")+(ds.length?hm(dt):"אין מפגשים");
+  $("dPick").value=day;
+  $("when").value=day+"T"+tm;
+  $("kids").innerHTML=[...new Set(sessions.map(s=>s.name).filter(Boolean))].sort().map(n=>`<option value="${esc(n)}">`).join("");
+  $("list").innerHTML=ds.length?ds.slice().sort((a,b)=>(a.time||"")<(b.time||"")?-1:1).map(s=>`<div class="row"><div><b dir="ltr">${s.time||"--:--"}</b> · ${s.min} דק׳<div class="sub" style="margin:0">${esc(s.name||"ללא שם")}</div></div><button data-id="${s.id}">הסרה</button></div>`).join(""):'<div class="empty">הזיני שם ושעה, ולחצי על 30, 45 או 50 כדי לרשום מפגש.</div>';
+
+  const ms=sessions.filter(s=>s.date.startsWith(month));
+  const tot=ms.reduce((a,s)=>a+s.min,0);
+  const md=parse(month+"-01");
+  const mName=md.toLocaleDateString(LOC,{month:"long",year:"numeric"});
+  $("mTitle").textContent=mName;
+  $("mHours").innerHTML=`${Math.floor(tot/60)}<small> שע׳ </small>${String(tot%60).padStart(2,"0")}<small> דק׳</small>`;
+  const byDay={};ms.forEach(s=>byDay[s.date]=(byDay[s.date]||0)+s.min);
+  const dates=Object.keys(byDay).sort();
+  $("mSub").textContent=`${(tot/60).toFixed(2)} שעות · ${ms.length} מפגשים · ${dates.length} ימים`;
+  const cnt=DUR.map(m=>({m,n:ms.filter(s=>s.min===m).length}));
+  $("mChips").innerHTML=cnt.map(c=>`<span class="chip">${c.n} × ${c.m} דק׳</span>`).join("");
+  $("days").innerHTML=dates.length?dates.slice().reverse().map(k=>{
+    const x=parse(k);const n=ms.filter(s=>s.date===k).length;
+    return `<button class="day ${k===day?"sel":""}" data-d="${k}"><span>${x.toLocaleDateString(LOC,{weekday:"short",day:"numeric"})} <em>· ${n===1?"מפגש אחד":n+" מפגשים"}</em></span><b>${hm(byDay[k])}</b></button>`}).join(""):'<div class="empty">לא נרשם דבר בחודש זה.</div>';
+  summaryText=`${mName}\nסה״כ: ${hm(tot)} (${(tot/60).toFixed(2)} שעות)\nמפגשים: ${ms.length}\n`+cnt.map(c=>`${c.n} × ${c.m} דק׳`).join(", ")+"\n\n"+dates.map(k=>`${k}: ${hm(byDay[k])}`).join("\n");
+}
+
+/* ---------- export, backup, restore ---------- */
+const META="session-hours-meta";
+let meta={};try{meta=JSON.parse(localStorage.getItem(META)||"{}")}catch(e){}
+const saveMeta=()=>{try{localStorage.setItem(META,JSON.stringify(meta))}catch(e){}};
+const sig=()=>{let h=5381;const s=sessions.map(x=>x.id+x.date+x.min).join("|");for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return sessions.length+":"+h};
+const msg=t=>{$("msg").textContent=t;clearTimeout(msg.t);msg.t=setTimeout(()=>$("msg").textContent="",5000)};
+const h2=m=>(m/60).toFixed(2);
+const BOM="\uFEFF";
+
+function monthCsv(){
+  const ms=sessions.filter(s=>s.date.startsWith(month));
+  const tot=ms.reduce((a,s)=>a+s.min,0);
+  return BOM+sessionRows(ms)+`סה״כ,,,${tot},${h2(tot)}\n`;
+}
+function sessionRows(list){
+  const q=n=>'"'+String(n||"").replace(/"/g,'""')+'"';
+  return "תאריך,שעה,שם,דקות,שעות\n"+list.slice().sort((a,b)=>(a.date+(a.time||""))<(b.date+(b.time||""))?-1:1).map(s=>`${s.date},${s.time||""},${q(s.name)},${s.min},${h2(s.min)}\n`).join("");
+}
+function allCsv(){
+  return BOM+sessionRows(sessions);
+}
+async function saveFile(name,text){
+  let dl=null;try{dl=window.claude?await claude.use("downloads"):null}catch(e){}
+  if(dl){
+    try{const r=await dl.save({filename:name,data:text});return r.status}
+    catch(e){if(e&&e.code==="declined")return "declined"}
+  }
+  try{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([text],{type:name.endsWith(".json")?"application/json":"text/csv"}));
+    a.download=name;document.body.appendChild(a);a.click();a.remove();return "saved";
+  }catch(e){return "failed"}
+}
+async function shareFile(name,text,type){
+  try{
+    const f=new File([text],name,{type});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return "shared"}
+  }catch(e){if(e&&e.name==="AbortError")return "declined"}
+  return saveFile(name,text);
+}
+const report=(r,ok)=>msg(r==="declined"?"בוטל.":r==="failed"?"לא ניתן לשמור את הקובץ כאן.":ok);
+
+$("mExport").onclick=async()=>report(await saveFile(`hours-${month}.csv`,monthCsv()),"קובץ ה-CSV מוכן.");
+$("mShare").onclick=async()=>report(await shareFile(`hours-${month}.csv`,monthCsv(),"text/csv"),"קובץ ה-CSV שותף.");
+$("allCsv").onclick=async()=>report(await saveFile("hours-all.csv",allCsv()),"קובץ ה-CSV מוכן.");
+
+$("bkSave").onclick=async()=>{
+  const data=JSON.stringify({app:"session-hours",version:1,exported:new Date().toISOString(),sessions},null,1);
+  const r=await saveFile(`session-hours-backup-${iso(new Date())}.json`,data);
+  if(r==="saved"||r==="delivered"){meta.last=Date.now();meta.sig=sig();saveMeta();bkStatus();msg("קובץ הגיבוי נשמר.")}
+  else report(r,"");
+};
+$("bkRestore").onclick=()=>$("bkFile").click();
+$("bkFile").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{
+    const j=JSON.parse(await f.text());
+    if(!j||j.app!=="session-hours"||!Array.isArray(j.sessions))throw 0;
+    const have=new Set(sessions.map(s=>String(s.id)));let add=0;
+    j.sessions.forEach(s=>{if(s&&/^\d{4}-\d{2}-\d{2}$/.test(s.date)&&Number.isFinite(+s.min)&&s.min>0&&!have.has(String(s.id))){sessions.push({id:s.id,date:s.date,min:+s.min,name:s.name||"",time:s.time||""});have.add(String(s.id));add++}});
+    save();render();msg(add?`שוחזרו ${add} מפגשים.`:"אין מה לשחזר, הכל כבר קיים.");
+  }catch(err){msg("הקובץ אינו קובץ גיבוי של האפליקציה.")}
+};
+
+function bkStatus(){
+  const el=$("bkStat");
+  const dirty=meta.sig!==sig();
+  if(!meta.last){el.textContent=sessions.length?"עדיין לא בוצע גיבוי. שמרי קובץ גיבוי.":"אין נתונים עדיין.";el.className="stat"+(sessions.length?" warn":"");return}
+  const when=new Date(meta.last).toLocaleString(LOC,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  el.textContent=dirty?`יש שינויים מאז הגיבוי האחרון (${when}). כדאי לגבות שוב.`:`הגיבוי האחרון: ${when}. הכל שמור.`;
+  el.className="stat"+(dirty?" warn":"");
+}
+function drawCal(){
+  const[y,m]=month.split("-").map(Number);
+  const lead=new Date(y,m-1,1).getDay();
+  const dim=new Date(y,m,0).getDate();
+  const worked=new Set(sessions.filter(s=>s.date.startsWith(month)).map(s=>s.date));
+  const today=iso(new Date());
+  let h=["א","ב","ג","ד","ה","ו","ש"].map(x=>`<div class="h">${x}</div>`).join("");
+  for(let i=0;i<lead;i++)h+="<div></div>";
+  for(let d=1;d<=dim;d++){
+    const k=month+"-"+String(d).padStart(2,"0");const w=worked.has(k);
+    h+=`<button data-d="${k}" class="${w?"w ":""}${k===today?"today ":""}${k===day?"sel":""}">${d}${w?'<span class="dot"></span>':""}</button>`;
+  }
+  $("cal").innerHTML=h;
+  $("calCap").textContent=`${parse(month+"-01").toLocaleDateString(LOC,{month:"long",year:"numeric"})} · ${worked.size} ימי עבודה`;
+}
+$("cal").onclick=e=>{const b=e.target.closest("button[data-d]");if(!b)return;day=b.dataset.d;render();scrollTo({top:0,behavior:"smooth"})};
+$("calBox").open=meta.calOpen!==false;
+$("calBox").addEventListener("toggle",()=>{meta.calOpen=$("calBox").open;saveMeta()});
+const _render=render;render=function(){_render();bkStatus();drawCal()};
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+render();
+</script>
+</body>
+</html>
