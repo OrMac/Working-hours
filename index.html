@@ -64,6 +64,19 @@ h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 4px 8px}
 .cal button.sel{background:var(--acc);color:var(--accink)}
 .cal .dot{width:6px;height:6px;border-radius:50%;background:var(--acc)}
 .cal .sel .dot{background:var(--accink)}
+.sug{position:absolute;inset-inline:0;top:100%;z-index:20;margin-top:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.18);max-height:220px;overflow:auto}
+.sug button{display:block;width:100%;text-align:start;padding:12px;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;font-size:16px;font-weight:500}
+.sug button:first-child{border-top:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two .copy{margin-top:0}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{height:44px;border-radius:10px;border:1.5px solid var(--acc);background:none;color:var(--acc);font-size:16px;font-weight:700}
+.seg button.on{background:var(--acc);color:var(--accink)}
+.edrow{padding:11px 0;border-top:1px solid var(--line)}
+.edrow:first-child{border-top:0}
+.edrow .form{margin-top:0}
+.row .acts{display:flex;gap:4px}
+.row .eb{color:var(--acc)}
 #msg{min-height:20px;margin:10px 4px 0;font-size:14px;color:var(--acc);font-weight:600}
 </style>
 </head>
@@ -76,10 +89,9 @@ h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 4px 8px}
     <button id="dNext" aria-label="היום הבא">›</button>
   </div>
   <div class="card form">
-    <label>שם הילד/ה<input id="kid" type="text" list="kids" autocomplete="off" placeholder="הקלידי שם"></label>
+    <label>שם הילד/ה<input id="kid" type="text" autocomplete="off" placeholder="הקלידי שם"></label>
     <label>תאריך ושעת התחלה<input id="when" type="datetime-local"></label>
   </div>
-  <datalist id="kids"></datalist>
   <div class="add" id="add"></div>
 
   <h2>מפגשים ביום זה</h2>
@@ -99,7 +111,7 @@ h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 4px 8px}
     <button class="copy" id="copy" style="margin-top:10px">העתקת סיכום</button>
   </div>
 
-  <h2>ימי עבודה</h2>
+  <h2>ימי עבודה בחודש זה</h2>
   <div class="card" id="days"></div>
 
   <details class="fold" id="calBox" open>
@@ -144,8 +156,23 @@ $("add").innerHTML=DUR.map(m=>`<button data-m="${m}">${m}<span>דק׳</span></bu
 $("add").onclick=e=>{const b=e.target.closest("button");if(!b)return;
   sessions.push({id:Date.now()+Math.random(),date:day,min:+b.dataset.m,name:$("kid").value.trim(),time:tm});save();$("kid").value="";
   if(navigator.vibrate)navigator.vibrate(15);render()};
-$("list").onclick=e=>{const b=e.target.closest("button[data-id]");if(!b)return;
-  sessions=sessions.filter(s=>String(s.id)!==b.dataset.id);save();render()};
+$("list").onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  const L=$("list");
+  if(b.dataset.id){sessions=sessions.filter(s=>String(s.id)!==b.dataset.id);save();render();return}
+  if(b.dataset.edit){editId=b.dataset.edit;const s=sessions.find(x=>String(x.id)===editId);editDur=s?s.min:0;render();return}
+  if(b.dataset.dur){editDur=+b.dataset.dur;L.querySelectorAll("[data-dur]").forEach(x=>x.classList.toggle("on",x===b));return}
+  if(b.hasAttribute("data-cancel")){editId=null;render();return}
+  if(b.hasAttribute("data-save")){
+    const s=sessions.find(x=>String(x.id)===String(editId));
+    if(!s){editId=null;render();return}
+    const g=f=>L.querySelector(`[data-f=${f}]`).value;
+    s.name=g("name").trim();s.time=g("time")||s.time;
+    if(/^\d{4}-\d{2}-\d{2}$/.test(g("date")))s.date=g("date");
+    s.min=editDur||s.min;
+    editId=null;save();day=s.date;month=day.slice(0,7);render();
+  }
+};
 const shiftDay=n=>{const d=parse(day);d.setDate(d.getDate()+n);day=iso(d);month=day.slice(0,7);render()};
 $("dPrev").onclick=()=>shiftDay(-1);$("dNext").onclick=()=>shiftDay(1);
 $("dPick").onchange=e=>{if(e.target.value){day=e.target.value;month=day.slice(0,7);render()}};
@@ -170,8 +197,7 @@ function render(){
   $("dTotal").textContent=(day===today?"היום · ":"")+(ds.length?hm(dt):"אין מפגשים");
   $("dPick").value=day;
   $("when").value=day+"T"+tm;
-  $("kids").innerHTML=[...new Set(sessions.map(s=>s.name).filter(Boolean))].sort().map(n=>`<option value="${esc(n)}">`).join("");
-  $("list").innerHTML=ds.length?ds.slice().sort((a,b)=>(a.time||"")<(b.time||"")?-1:1).map(s=>`<div class="row"><div><b dir="ltr">${s.time||"--:--"}</b> · ${s.min} דק׳<div class="sub" style="margin:0">${esc(s.name||"ללא שם")}</div></div><button data-id="${s.id}">הסרה</button></div>`).join(""):'<div class="empty">הזיני שם ושעה, ולחצי על 30, 45 או 50 כדי לרשום מפגש.</div>';
+  $("list").innerHTML=ds.length?ds.slice().sort((a,b)=>(a.time||"")<(b.time||"")?-1:1).map(s=>String(s.id)===String(editId)?`<div class="edrow">${editHtml(s)}</div>`:`<div class="row"><div><b dir="ltr">${s.time?s.time+"–"+endT(s):"--:--"}</b> · ${s.min} דק׳<div class="sub" style="margin:0">${esc(s.name||"ללא שם")}</div></div><div class="acts"><button class="eb" data-edit="${s.id}">עריכה</button><button data-id="${s.id}">הסרה</button></div></div>`).join(""):'<div class="empty">הזיני שם ושעה, ולחצי על 30, 45 או 50 כדי לרשום מפגש.</div>';
 
   const ms=sessions.filter(s=>s.date.startsWith(month));
   const tot=ms.reduce((a,s)=>a+s.min,0);
@@ -202,11 +228,11 @@ const BOM="\uFEFF";
 function monthCsv(){
   const ms=sessions.filter(s=>s.date.startsWith(month));
   const tot=ms.reduce((a,s)=>a+s.min,0);
-  return BOM+sessionRows(ms)+`סה״כ,,,${tot},${h2(tot)}\n`;
+  return BOM+sessionRows(ms)+`סה״כ,,,,${tot},${h2(tot)}\n`;
 }
 function sessionRows(list){
   const q=n=>'"'+String(n||"").replace(/"/g,'""')+'"';
-  return "תאריך,שעה,שם,דקות,שעות\n"+list.slice().sort((a,b)=>(a.date+(a.time||""))<(b.date+(b.time||""))?-1:1).map(s=>`${s.date},${s.time||""},${q(s.name)},${s.min},${h2(s.min)}\n`).join("");
+  return "תאריך,שעת התחלה,שעת סיום,שם,דקות,שעות\n"+list.slice().sort((a,b)=>(a.date+(a.time||""))<(b.date+(b.time||""))?-1:1).map(s=>`${s.date},${s.time||""},${endT(s)},${q(s.name)},${s.min},${h2(s.min)}\n`).join("");
 }
 function allCsv(){
   return BOM+sessionRows(sessions);
@@ -280,7 +306,22 @@ function drawCal(){
 $("cal").onclick=e=>{const b=e.target.closest("button[data-d]");if(!b)return;day=b.dataset.d;render();scrollTo({top:0,behavior:"smooth"})};
 $("calBox").open=meta.calOpen!==false;
 $("calBox").addEventListener("toggle",()=>{meta.calOpen=$("calBox").open;saveMeta()});
-const _render=render;render=function(){_render();bkStatus();drawCal()};
+let editId=null,editDur=0;
+const endT=s=>{if(!s.time)return "";const p=s.time.split(":").map(Number);const t=(p[0]*60+p[1]+s.min)%1440;return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")};
+const kidNames=()=>{const c={};sessions.forEach(s=>{if(s.name)c[s.name]=(c[s.name]||0)+1});return Object.keys(c).sort((a,b)=>c[b]-c[a]||a.localeCompare(b,"he"))};
+function suggest(inp){
+  const box=document.createElement("div");box.className="sug";box.hidden=true;
+  inp.parentNode.style.position="relative";inp.parentNode.appendChild(box);
+  const show=()=>{const q=inp.value.trim().toLowerCase();
+    const l=kidNames().filter(n=>n.toLowerCase().includes(q)&&n!==inp.value.trim()).slice(0,6);
+    box.innerHTML=l.map(n=>`<button type="button">${esc(n)}</button>`).join("");box.hidden=!l.length};
+  inp.addEventListener("focus",show);inp.addEventListener("input",show);
+  inp.addEventListener("blur",()=>setTimeout(()=>{box.hidden=true},200));
+  box.addEventListener("pointerdown",e=>{const b=e.target.closest("button");if(!b)return;e.preventDefault();inp.value=b.textContent;box.hidden=true});
+}
+const editHtml=s=>`<div class="form"><label>שם<input data-f="name" type="text" autocomplete="off" value="${esc(s.name||"")}"></label><div class="two"><label>תאריך<input data-f="date" type="date" value="${s.date}"></label><label>שעת התחלה<input data-f="time" type="time" value="${s.time||""}"></label></div><div class="seg">${DUR.map(m=>`<button type="button" data-dur="${m}" class="${m===editDur?"on":""}">${m} דק׳</button>`).join("")}</div><div class="two"><button class="copy fill" data-save>שמירה</button><button class="copy" data-cancel>ביטול</button></div></div>`;
+suggest($("kid"));
+const _render=render;render=function(){_render();bkStatus();drawCal();const en=$("list").querySelector("input[data-f=name]");if(en)suggest(en)};
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 render();
 </script>
